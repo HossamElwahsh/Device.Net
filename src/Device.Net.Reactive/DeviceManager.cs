@@ -84,8 +84,7 @@ namespace Device.Net
         #endregion
 
         #region Public Methods
-        public void Start()
-        {
+        public void Start() =>
             _ = Task.Run(async () =>
             {
                 while (!isDisposed)
@@ -96,18 +95,15 @@ namespace Device.Net
                     await Task.Delay(TimeSpan.FromMilliseconds(_pollMilliseconds));
                 }
             });
-        }
 
         /// <summary>
         /// Sets the selected device
         /// </summary>
         /// <param name="connectedDevice"></param>
-        public void SelectDevice(ConnectedDeviceDefinition connectedDevice)
-        {
+        public void SelectDevice(ConnectedDeviceDefinition connectedDevice) =>
             _ = connectedDevice == null
                 ? throw new ArgumentNullException(nameof(connectedDevice))
                 : InitializeDeviceAsync(connectedDevice);
-        }
 
         public async Task<TResponse> WriteAndReadAsync<TResponse>(IRequest request, Func<byte[], TResponse> convertFunc)
         {
