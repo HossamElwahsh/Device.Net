@@ -89,78 +89,76 @@ namespace Hid.Net.Windows
             }
         }
 
-        public Task InitializeAsync(CancellationToken cancellationToken = default)
-        {
-            return Task.Run(() =>
-              {
-                  using var logScope = _logger.BeginScope("DeviceId: {deviceId} Call: {call}", DeviceId, nameof(InitializeAsync));
+        public Task InitializeAsync(CancellationToken cancellationToken = default) =>
+            Task.Run(() =>
+            {
+                using var logScope = _logger.BeginScope("DeviceId: {deviceId} Call: {call}", DeviceId, nameof(InitializeAsync));
 
-                  if (string.IsNullOrEmpty(DeviceId))
-                  {
-                      throw new ValidationException(
-                          $"{nameof(DeviceId)} must be specified before {nameof(InitializeAsync)} can be called.");
-                  }
+                if (string.IsNullOrEmpty(DeviceId))
+                {
+                    throw new ValidationException(
+                        $"{nameof(DeviceId)} must be specified before {nameof(InitializeAsync)} can be called.");
+                }
 
-                  _readSafeFileHandle = _hidService.CreateReadConnection(DeviceId, FileAccessRights.GenericRead);
-                  _writeSafeFileHandle = _hidService.CreateWriteConnection(DeviceId);
+                _readSafeFileHandle = _hidService.CreateReadConnection(DeviceId, FileAccessRights.GenericRead);
+                _writeSafeFileHandle = _hidService.CreateWriteConnection(DeviceId);
 
-                  if (_readSafeFileHandle.IsInvalid)
-                  {
-                      throw new ApiException(Messages.ErrorMessageCantOpenRead);
-                  }
+                if (_readSafeFileHandle.IsInvalid)
+                {
+                    throw new ApiException(Messages.ErrorMessageCantOpenRead);
+                }
 
-                  IsReadOnly = _writeSafeFileHandle.IsInvalid;
+                IsReadOnly = _writeSafeFileHandle.IsInvalid;
 
-                  if (IsReadOnly.Value)
-                  {
-                      _logger.LogWarning(Messages.WarningMessageOpeningInReadonlyMode, DeviceId);
-                  }
+                if (IsReadOnly.Value)
+                {
+                    _logger.LogWarning(Messages.WarningMessageOpeningInReadonlyMode, DeviceId);
+                }
 
-                  ConnectedDeviceDefinition = _hidService.GetDeviceDefinition(DeviceId, _readSafeFileHandle);
+                ConnectedDeviceDefinition = _hidService.GetDeviceDefinition(DeviceId, _readSafeFileHandle);
 
-                  ReadBufferSize ??= (ushort?)ConnectedDeviceDefinition.ReadBufferSize;
-                  WriteBufferSize ??= (ushort?)ConnectedDeviceDefinition.WriteBufferSize;
+                ReadBufferSize ??= (ushort?)ConnectedDeviceDefinition.ReadBufferSize;
+                WriteBufferSize ??= (ushort?)ConnectedDeviceDefinition.WriteBufferSize;
 
-                  if (!ReadBufferSize.HasValue)
-                  {
-                      throw new ValidationException(
-                          $"ReadBufferSize must be specified. HidD_GetAttributes may have failed or returned an InputReportByteLength of 0. Please specify this argument in the constructor");
-                  }
+                if (!ReadBufferSize.HasValue)
+                {
+                    throw new ValidationException(
+                        $"ReadBufferSize must be specified. HidD_GetAttributes may have failed or returned an InputReportByteLength of 0. Please specify this argument in the constructor");
+                }
 
-                  _readFileStream = _hidService.OpenRead(_readSafeFileHandle, ReadBufferSize.Value);
+                _readFileStream = _hidService.OpenRead(_readSafeFileHandle, ReadBufferSize.Value);
 
-                  if (_readFileStream.CanRead)
-                  {
-                      _logger.LogInformation(Messages.SuccessMessageReadFileStreamOpened);
-                  }
-                  else
-                  {
-                      _logger.LogWarning(Messages.WarningMessageReadFileStreamCantRead);
-                  }
+                if (_readFileStream.CanRead)
+                {
+                    _logger.LogInformation(Messages.SuccessMessageReadFileStreamOpened);
+                }
+                else
+                {
+                    _logger.LogWarning(Messages.WarningMessageReadFileStreamCantRead);
+                }
 
-                  if (IsReadOnly.Value) return;
+                if (IsReadOnly.Value) return;
 
-                  if (!WriteBufferSize.HasValue)
-                  {
-                      throw new ValidationException(
-                          $"WriteBufferSize must be specified. HidD_GetAttributes may have failed or returned an OutputReportByteLength of 0. Please specify this argument in the constructor");
-                  }
+                if (!WriteBufferSize.HasValue)
+                {
+                    throw new ValidationException(
+                        $"WriteBufferSize must be specified. HidD_GetAttributes may have failed or returned an OutputReportByteLength of 0. Please specify this argument in the constructor");
+                }
 
-                  //Don't open if this is a read only connection
-                  _writeFileStream = _hidService.OpenWrite(_writeSafeFileHandle, WriteBufferSize.Value);
+                //Don't open if this is a read only connection
+                _writeFileStream = _hidService.OpenWrite(_writeSafeFileHandle, WriteBufferSize.Value);
 
-                  if (_writeFileStream.CanWrite)
-                  {
-                      _logger.LogInformation(Messages.SuccessMessageWriteFileStreamOpened);
-                  }
-                  else
-                  {
-                      _logger.LogWarning(Messages.WarningMessageWriteFileStreamCantWrite);
-                  }
+                if (_writeFileStream.CanWrite)
+                {
+                    _logger.LogInformation(Messages.SuccessMessageWriteFileStreamOpened);
+                }
+                else
+                {
+                    _logger.LogWarning(Messages.WarningMessageWriteFileStreamCantWrite);
+                }
 
-                  IsInitialized = true;
-              }, cancellationToken);
-        }
+                IsInitialized = true;
+            }, cancellationToken);
 
         public async Task<Report> ReadReportAsync(CancellationToken cancellationToken = default)
         {

@@ -42,9 +42,8 @@ namespace Hid.Net.Windows
         Func<Report, TransferResult> readReportTransform = null,
         Func<TransferResult, Report> readTransferTransform = null,
         Func<byte[], byte, byte[]> writeTransferTransform = null,
-        WriteReportTransform writeReportTransform = null)
-        {
-            return CreateWindowsHidDeviceFactory(
+        WriteReportTransform writeReportTransform = null) =>
+            CreateWindowsHidDeviceFactory(
                 new ReadOnlyCollection<FilterDeviceDefinition>(new List<FilterDeviceDefinition>()),
                 loggerFactory,
                 hidApiService,
@@ -56,7 +55,6 @@ namespace Hid.Net.Windows
                 readTransferTransform,
                 writeTransferTransform,
                 writeReportTransform: writeReportTransform);
-        }
 
         /// <summary>
         /// Creates a <see cref="IDeviceFactory"/> for Windows Hid devices
@@ -84,9 +82,8 @@ namespace Hid.Net.Windows
         Func<Report, TransferResult> readReportTransform = null,
         Func<TransferResult, Report> readTransferTransform = null,
         Func<byte[], byte, byte[]> writeTransferTransform = null,
-        WriteReportTransform writeReportTransform = null)
-        {
-            return CreateWindowsHidDeviceFactory(
+        WriteReportTransform writeReportTransform = null) =>
+            CreateWindowsHidDeviceFactory(
                 new ReadOnlyCollection<FilterDeviceDefinition>(new List<FilterDeviceDefinition> { filterDeviceDefinition }),
                 loggerFactory,
                 hidApiService,
@@ -98,7 +95,6 @@ namespace Hid.Net.Windows
                 readTransferTransform,
                 writeTransferTransform,
                 writeReportTransform);
-        }
 
         /// <summary>
         /// Creates a factory Hid devices
